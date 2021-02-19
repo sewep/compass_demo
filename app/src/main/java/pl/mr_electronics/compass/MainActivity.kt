@@ -22,40 +22,45 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        drawCompass()
+        drawCompass(20f, 20f)
     }
 
-    fun drawCompass() {
+    fun drawCompass(dirWalk: Float, dirDestination: Float) {
         val bitmap: Bitmap = Bitmap.createBitmap(800, 800, Bitmap.Config.ARGB_8888)
         val canvas: Canvas = Canvas(bitmap)
 
 
-        paintCentralStar(canvas)
-        paintTrianglesOnACircle(canvas)
-        paintAzymutArrow(canvas)
+        paintCentralStar(canvas, dirWalk)
+        paintTrianglesOnACircle(canvas, dirWalk)
+        paintAzymutArrow(canvas, dirWalk, dirDestination)
 
 
         // set bitmap as background to ImageView
         compass_view.setImageBitmap(bitmap)
     }
 
-    fun paintAzymutArrow(canvas: Canvas) {
+    fun getPaintColor(color: String) : Paint {
+        return getPaintColor(Color.parseColor(color))
+    }
+
+    fun getPaintColor(color: Int) : Paint {
         val paint_green = Paint()
         paint_green.setStyle(Paint.Style.FILL)
-        paint_green.setColor(Color.parseColor("#00cc00"))
+        paint_green.setColor(color)
+        return paint_green
+    }
+
+    fun paintAzymutArrow(canvas: Canvas, dirWalk: Float, direction: Float) {
+        val paint_green = getPaintColor("#00cc00")
 
         var trans = PointF(400.0f,400.0f)
         var trans2 = PointF(0.0f,-354.0f)
-        paintPolygon(canvas, paint_green, arrow6, trans, 0F, trans2)
+        paintPolygon(canvas, paint_green, arrow6, trans, direction - dirWalk, trans2)
     }
 
-    fun paintTrianglesOnACircle(canvas: Canvas) {
-        val paint_red = Paint()
-        paint_red.setStyle(Paint.Style.FILL)
-        paint_red.setColor(Color.RED)
-        val paint_gray = Paint()
-        paint_gray.setStyle(Paint.Style.FILL)
-        paint_gray.setColor(Color.parseColor("#202020"));
+    fun paintTrianglesOnACircle(canvas: Canvas, dirWalk: Float) {
+        val paint_red = getPaintColor(Color.RED)
+        val paint_gray = getPaintColor("#202020")
 
         var trans = PointF(400.0f,400.0f)
         var trans2 = PointF(0.0f,-350.0f)
@@ -67,32 +72,27 @@ class MainActivity : AppCompatActivity() {
             if (deg % 90 == 0) list_pkt = arrow5
             if ((deg-50) % 90 == 0) list_pkt = arrow4
 
-            paintPolygon(canvas, paint_c, list_pkt, trans, deg.toFloat(), trans2)
+            paintPolygon(canvas, paint_c, list_pkt, trans, deg.toFloat() - dirWalk, trans2)
         }
     }
 
-    fun paintCentralStar(canvas: Canvas) {
-        val paint_red = Paint()
-        paint_red.setStyle(Paint.Style.FILL)
-        paint_red.setColor(Color.RED);
-        val paint_gray = Paint()
-        paint_gray.setStyle(Paint.Style.FILL)
-        paint_gray.setColor(Color.parseColor("#202020"));
-        val paint_white = Paint()
-        paint_white.setColor(Color.WHITE);
+    fun paintCentralStar(canvas: Canvas, dirWalk: Float) {
+        val paint_red = getPaintColor(Color.RED)
+        val paint_gray = getPaintColor("#202020")
+        val paint_white = getPaintColor(Color.WHITE)
 
 
         var trans = PointF(400.0f,400.0f)
 
-        paintPolygon(canvas, paint_red, arrow1, trans, 0.0f)
-        paintPolygon(canvas, paint_gray, arrow1, trans, 90.0f)
-        paintPolygon(canvas, paint_gray, arrow1, trans, 180.0f)
-        paintPolygon(canvas, paint_gray, arrow1, trans, 270.0f)
+        paintPolygon(canvas, paint_red, arrow1, trans, 0.0f - dirWalk)
+        paintPolygon(canvas, paint_gray, arrow1, trans, 90.0f - dirWalk)
+        paintPolygon(canvas, paint_gray, arrow1, trans, 180.0f - dirWalk)
+        paintPolygon(canvas, paint_gray, arrow1, trans, 270.0f - dirWalk)
 
-        paintPolygon(canvas, paint_gray, arrow2, trans, 50.0f)
-        paintPolygon(canvas, paint_gray, arrow2, trans, 140.0f)
-        paintPolygon(canvas, paint_gray, arrow2, trans, 230.0f)
-        paintPolygon(canvas, paint_gray, arrow2, trans, 320.0f)
+        paintPolygon(canvas, paint_gray, arrow2, trans, 50.0f - dirWalk)
+        paintPolygon(canvas, paint_gray, arrow2, trans, 140.0f - dirWalk)
+        paintPolygon(canvas, paint_gray, arrow2, trans, 230.0f - dirWalk)
+        paintPolygon(canvas, paint_gray, arrow2, trans, 320.0f - dirWalk)
 
         paintCircle(canvas, paint_gray, trans, 70)
         paintCircle(canvas, paint_white, trans, 50)
