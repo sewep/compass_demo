@@ -18,13 +18,17 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.Window
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.Exception
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener {
@@ -279,19 +283,38 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
         dialog!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog!!.setCancelable(false)
         dialog!!.setContentView(R.layout.dialog_gps_destination)
-        //val body = dialog.findViewById(R.id.body) as TextView
-        //body.text = title
-        //val yesBtn = dialog.findViewById(R.id.yesBtn) as Button
-        //val noBtn = dialog.findViewById(R.id.noBtn) as TextView
-        //yesBtn.setOnClickListener {
-        //    dialog.dismiss()
-        //}
-        //noBtn.setOnClickListener { dialog.dismiss() }
         dialog!!.show()
+
+        if (location_dest != null) {
+            dialog!!.findViewById<EditText>(R.id.new_lat).setText(location_dest!!.latitude.toString())
+            dialog!!.findViewById<EditText>(R.id.new_long).setText(location_dest!!.longitude.toString())
+        }
+
+        val width = (resources.displayMetrics.widthPixels * 0.85).toInt()
+        val height = (resources.displayMetrics.heightPixels * 0.40).toInt()
+        dialog!!.window?.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
     fun onClickSave(view: View) {
+        var new_lat = dialog!!.findViewById<EditText>(R.id.new_lat)
+        var new_long = dialog!!.findViewById<EditText>(R.id.new_long)
+
+        try {
+            location_dest = Location(LocationManager.GPS_PROVIDER)
+            location_dest!!.latitude = new_lat.text.toString().toDouble()
+            location_dest!!.longitude = new_long.text.toString().toDouble()
+        } catch (ex: Exception) {
+
+        }
+
+        dialog!!.dismiss()
+        dialog = null
+    }
+
+    fun onClickCancel(view: View) {
         dialog!!.dismiss()
         dialog = null
     }
 }
+
+
