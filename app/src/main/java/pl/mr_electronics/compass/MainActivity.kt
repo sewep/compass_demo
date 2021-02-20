@@ -18,8 +18,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.KeyEvent
-import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.EditText
@@ -28,41 +26,41 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
-import java.lang.Exception
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener {
 
-    var arrow1 = listOf(PointF(-35.0f, 0.0f), PointF(0.0f, -300.0f), PointF(35.0f, 0.0f))
-    var arrow2 = listOf(PointF(-25.0f, 0.0f), PointF(0.0f, -220.0f), PointF(25.0f, 0.0f))
-    var arrow3 = listOf(PointF(-8.0f, 0.0f), PointF(0.0f, 20.0f), PointF(8.0f, 0.0f))
-    var arrow4 = listOf(PointF(-16.0f, 0.0f), PointF(0.0f, 34.0f), PointF(16.0f, 0.0f))
-    var arrow5 = listOf(PointF(-25.0f, 0.0f), PointF(0.0f, 46.0f), PointF(25.0f, 0.0f))
-    var arrow6 = listOf(PointF(-25.0f, 0.0f), PointF(0.0f, -46.0f), PointF(25.0f, 0.0f))
+    private var arrow1 = listOf(PointF(-35.0f, 0.0f), PointF(0.0f, -300.0f), PointF(35.0f, 0.0f))
+    private var arrow2 = listOf(PointF(-25.0f, 0.0f), PointF(0.0f, -220.0f), PointF(25.0f, 0.0f))
+    private var arrow3 = listOf(PointF(-8.0f, 0.0f), PointF(0.0f, 20.0f), PointF(8.0f, 0.0f))
+    private var arrow4 = listOf(PointF(-16.0f, 0.0f), PointF(0.0f, 34.0f), PointF(16.0f, 0.0f))
+    private var arrow5 = listOf(PointF(-25.0f, 0.0f), PointF(0.0f, 46.0f), PointF(25.0f, 0.0f))
+    private var arrow6 = listOf(PointF(-25.0f, 0.0f), PointF(0.0f, -46.0f), PointF(25.0f, 0.0f))
 
     private val locationPermissionCode = 2
     private lateinit var sensorManager: SensorManager
     private lateinit var accelerometer: Sensor
     private lateinit var magneticField: Sensor
     private lateinit var locationManager: LocationManager
-    var handler: Handler = Handler(Looper.getMainLooper())
-    var dialog: Dialog? = null
-    var location_curr: Location? = null
-    var location_dest: Location? = null
+    private var handler: Handler = Handler(Looper.getMainLooper())
+    private var dialog: Dialog? = null
+    private var locationCurr: Location? = null
+    private var locationDest: Location? = null
 
-    var mGravity: FloatArray? = null
-    var mGeomagnetic: FloatArray? = null
-    var azimut: Float = 0f
-    var azimutAverage: Float = 0f
+    private var mGravity: FloatArray? = null
+    private var mGeomagnetic: FloatArray? = null
+    private var azimut: Float = 0f
+    private var azimutAverage: Float = 0f
+    private var tsGetGpsLocation: Long = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        location_dest = Location(LocationManager.GPS_PROVIDER)
-        location_dest!!.latitude = 37.4723
-        location_dest!!.longitude = -122.221
+        locationDest = Location(LocationManager.GPS_PROVIDER)
+        locationDest!!.latitude = 37.4723
+        locationDest!!.longitude = -122.221
 
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -80,35 +78,35 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
             override fun run() {
                 azimutAverage = azimutAverage * 0.8f + azimut * 0.2f
 
-                var dest_dg: Float? = null;
+                var destDg: Float? = null
 
-                if (location_dest != null && location_curr != null) {
-                    distanceInfo.text = String.format("Distance from the destination: %.0f m.", location_curr!!.distanceTo(location_dest))
-                    dest_dg = location_curr!!.bearingTo(location_dest)
+                if (System.currentTimeMillis() - tsGetGpsLocation > 10000) {
+                    distanceInfo.text = getString(R.string.no_gps_signal)
                 } else {
-                    distanceInfo.text = "Enter the destination point.";
+                    if (locationDest != null && locationCurr != null) {
+                        distanceInfo.text = String.format(getString(R.string.distance_fom_the_destination), locationCurr!!.distanceTo(locationDest))
+                        destDg = locationCurr!!.bearingTo(locationDest)
+                    } else {
+                        distanceInfo.text = getString(R.string.enter_the_detination_point)
+                    }
                 }
 
-                drawCompass(azimut, dest_dg)
+                drawCompass(azimut, destDg)
 
                 handler.postDelayed(this, 500)
             }
         },200)
     }
 
-    override fun onStart() {
-        super.onStart()
-    }
-
     override fun onResume() {
         super.onResume()
-        sensorManager.registerListener(this, this.accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
-        sensorManager.registerListener(this, this.magneticField, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(this, this.accelerometer, SensorManager.SENSOR_DELAY_FASTEST)
+        sensorManager.registerListener(this, this.magneticField, SensorManager.SENSOR_DELAY_FASTEST)
     }
 
     override fun onPause() {
         super.onPause()
-        sensorManager.unregisterListener(this);
+        sensorManager.unregisterListener(this)
     }
 
     fun drawCompass(dirWalk: Float, dirDestination: Float?) {
@@ -118,92 +116,91 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
 
         paintCentralStar(canvas, dirWalk)
         paintTrianglesOnACircle(canvas, dirWalk)
-        if (dirDestination != null) paintAzymutArrow(canvas, dirWalk, dirDestination!!)
-
+        if (dirDestination != null) paintAzymutArrow(canvas, dirWalk, dirDestination)
 
         // set bitmap as background to ImageView
         compass_view.setImageBitmap(bitmap)
     }
 
-    fun getPaintColor(color: String) : Paint {
+    private fun getPaintColor(color: String) : Paint {
         return getPaintColor(Color.parseColor(color))
     }
 
-    fun getPaintColor(color: Int) : Paint {
-        val paint_green = Paint()
-        paint_green.setStyle(Paint.Style.FILL)
-        paint_green.setColor(color)
-        return paint_green
+    private fun getPaintColor(color: Int) : Paint {
+        val paintGreen = Paint()
+        paintGreen.style = Paint.Style.FILL
+        paintGreen.color = color
+        return paintGreen
     }
 
-    fun paintAzymutArrow(canvas: Canvas, dirWalk: Float, direction: Float) {
-        val paint_green = getPaintColor("#00cc00")
+    private fun paintAzymutArrow(canvas: Canvas, dirWalk: Float, direction: Float) {
+        val paintGreen = getPaintColor("#00cc00")
 
-        var trans = PointF(400.0f,400.0f)
-        var trans2 = PointF(0.0f,-354.0f)
-        paintPolygon(canvas, paint_green, arrow6, trans, direction - dirWalk, trans2)
+        val trans = PointF(400.0f,400.0f)
+        val trans2 = PointF(0.0f,-354.0f)
+        paintPolygon(canvas, paintGreen, arrow6, trans, direction - dirWalk, trans2)
     }
 
-    fun paintTrianglesOnACircle(canvas: Canvas, dirWalk: Float) {
-        val paint_red = getPaintColor(Color.RED)
-        val paint_gray = getPaintColor("#202020")
+    private fun paintTrianglesOnACircle(canvas: Canvas, dirWalk: Float) {
+        val paintRed = getPaintColor(Color.RED)
+        val paintGray = getPaintColor("#202020")
 
-        var trans = PointF(400.0f,400.0f)
-        var trans2 = PointF(0.0f,-350.0f)
+        val trans = PointF(400.0f,400.0f)
+        val trans2 = PointF(0.0f,-350.0f)
 
         for (deg in 0..359 step 10) {
-            var list_pkt = arrow3
-            var paint_c = paint_gray
-            if (deg == 0) paint_c = paint_red
-            if (deg % 90 == 0) list_pkt = arrow5
-            if ((deg-50) % 90 == 0) list_pkt = arrow4
+            var listPkt = arrow3
+            var paintC = paintGray
+            if (deg == 0) paintC = paintRed
+            if (deg % 90 == 0) listPkt = arrow5
+            if ((deg-50) % 90 == 0) listPkt = arrow4
 
-            paintPolygon(canvas, paint_c, list_pkt, trans, deg.toFloat() - dirWalk, trans2)
+            paintPolygon(canvas, paintC, listPkt, trans, deg.toFloat() - dirWalk, trans2)
         }
     }
 
-    fun paintCentralStar(canvas: Canvas, dirWalk: Float) {
-        val paint_red = getPaintColor(Color.RED)
-        val paint_gray = getPaintColor("#202020")
-        val paint_white = getPaintColor(Color.WHITE)
+    private fun paintCentralStar(canvas: Canvas, dirWalk: Float) {
+        val paintRed = getPaintColor(Color.RED)
+        val paintGray = getPaintColor("#202020")
+        val paintWhite = getPaintColor(Color.WHITE)
 
 
-        var trans = PointF(400.0f,400.0f)
+        val trans = PointF(400.0f,400.0f)
 
-        paintPolygon(canvas, paint_red, arrow1, trans, 0.0f - dirWalk)
-        paintPolygon(canvas, paint_gray, arrow1, trans, 90.0f - dirWalk)
-        paintPolygon(canvas, paint_gray, arrow1, trans, 180.0f - dirWalk)
-        paintPolygon(canvas, paint_gray, arrow1, trans, 270.0f - dirWalk)
+        paintPolygon(canvas, paintRed, arrow1, trans, 0.0f - dirWalk)
+        paintPolygon(canvas, paintGray, arrow1, trans, 90.0f - dirWalk)
+        paintPolygon(canvas, paintGray, arrow1, trans, 180.0f - dirWalk)
+        paintPolygon(canvas, paintGray, arrow1, trans, 270.0f - dirWalk)
 
-        paintPolygon(canvas, paint_gray, arrow2, trans, 50.0f - dirWalk)
-        paintPolygon(canvas, paint_gray, arrow2, trans, 140.0f - dirWalk)
-        paintPolygon(canvas, paint_gray, arrow2, trans, 230.0f - dirWalk)
-        paintPolygon(canvas, paint_gray, arrow2, trans, 320.0f - dirWalk)
+        paintPolygon(canvas, paintGray, arrow2, trans, 50.0f - dirWalk)
+        paintPolygon(canvas, paintGray, arrow2, trans, 140.0f - dirWalk)
+        paintPolygon(canvas, paintGray, arrow2, trans, 230.0f - dirWalk)
+        paintPolygon(canvas, paintGray, arrow2, trans, 320.0f - dirWalk)
 
-        paintCircle(canvas, paint_gray, trans, 70)
-        paintCircle(canvas, paint_white, trans, 50)
-        paintCircle(canvas, paint_gray, trans, 30)
+        paintCircle(canvas, paintGray, trans, 70)
+        paintCircle(canvas, paintWhite, trans, 50)
+        paintCircle(canvas, paintGray, trans, 30)
     }
 
-    fun paintCircle(canvas: Canvas, paint: Paint, translate: PointF, r: Int) {
-        var shapeDrawable: ShapeDrawable = ShapeDrawable(OvalShape())
+    private fun paintCircle(canvas: Canvas, paint: Paint, translate: PointF, r: Int) {
+        val shapeDrawable = ShapeDrawable(OvalShape())
         shapeDrawable.setBounds(
                 translate.x.toInt()-r,
                 translate.y.toInt()-r,
                 translate.x.toInt()+r,
                 translate.y.toInt()+r)
-        shapeDrawable.getPaint().setColor(paint.color)
+        shapeDrawable.paint.color = paint.color
         shapeDrawable.draw(canvas)
     }
 
-    fun paintPolygon(canvas: Canvas, paint: Paint, points: List<PointF>, translate: PointF, deg: Float) {
-        paintPolygon(canvas, paint, points, translate, deg, PointF(0.0f, 0.0F));
+    private fun paintPolygon(canvas: Canvas, paint: Paint, points: List<PointF>, translate: PointF, deg: Float) {
+        paintPolygon(canvas, paint, points, translate, deg, PointF(0.0f, 0.0F))
     }
 
-    fun paintPolygon(canvas: Canvas, paint: Paint, points: List<PointF>, translate: PointF, deg: Float, translate2: PointF) {
+    private fun paintPolygon(canvas: Canvas, paint: Paint, points: List<PointF>, translate: PointF, deg: Float, translate2: PointF) {
         if (points.isEmpty()) return
 
-        var m = Matrix();
+        val m = Matrix()
         m.postTranslate(translate2.x, translate2.y)
         m.postRotate(deg)
         m.postTranslate(translate.x, translate.y)
@@ -233,27 +230,27 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        Log.i("Sensor", "onAccuracyChanged() ");
+        Log.i("Sensor", "onAccuracyChanged() ")
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (event == null) return
 
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
-            mGravity = event.values;
+        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER)
+            mGravity = event.values
 
-        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
-            mGeomagnetic = event.values;
+        if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD)
+            mGeomagnetic = event.values
 
         if (mGravity != null && mGeomagnetic != null) {
-            var R = FloatArray(9)
-            var I = FloatArray(9)
+            val r = FloatArray(9)
+            val i = FloatArray(9)
 
-            if (SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic)) {
+            if (SensorManager.getRotationMatrix(r, i, mGravity, mGeomagnetic)) {
 
                 // orientation contains azimut, pitch and roll
-                var orientation = FloatArray(3)
-                SensorManager.getOrientation(R, orientation);
+                val orientation = FloatArray(3)
+                SensorManager.getOrientation(r, orientation)
 
                 azimut = Math.toDegrees(orientation[0].toDouble()).toFloat()
                 //Log.i("Sensor", "azimut: " + azimut);
@@ -262,8 +259,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
     }
 
     override fun onLocationChanged(location: Location) {
-        Log.i("Sensor", "onLocationChanged() ");
-        this.location_curr = location;
+        Log.i("Sensor", "onLocationChanged() ")
+        this.locationCurr = location
+        tsGetGpsLocation = System.currentTimeMillis()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -278,31 +276,30 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
         }
     }
 
-    fun onClickGPS(view: View) {
+    fun onClickGPS() {
         dialog = Dialog(this)
         dialog!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        dialog!!.setCancelable(false)
+        dialog!!.setCancelable(true)
         dialog!!.setContentView(R.layout.dialog_gps_destination)
         dialog!!.show()
 
-        if (location_dest != null) {
-            dialog!!.findViewById<EditText>(R.id.new_lat).setText(location_dest!!.latitude.toString())
-            dialog!!.findViewById<EditText>(R.id.new_long).setText(location_dest!!.longitude.toString())
+        if (locationDest != null) {
+            dialog!!.findViewById<EditText>(R.id.new_lat).setText(locationDest!!.latitude.toString())
+            dialog!!.findViewById<EditText>(R.id.new_long).setText(locationDest!!.longitude.toString())
         }
 
         val width = (resources.displayMetrics.widthPixels * 0.85).toInt()
-        val height = (resources.displayMetrics.heightPixels * 0.40).toInt()
         dialog!!.window?.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
-    fun onClickSave(view: View) {
-        var new_lat = dialog!!.findViewById<EditText>(R.id.new_lat)
-        var new_long = dialog!!.findViewById<EditText>(R.id.new_long)
+    fun onClickSave() {
+        val newLat = dialog!!.findViewById<EditText>(R.id.new_lat)
+        val newLong = dialog!!.findViewById<EditText>(R.id.new_long)
 
         try {
-            location_dest = Location(LocationManager.GPS_PROVIDER)
-            location_dest!!.latitude = new_lat.text.toString().toDouble()
-            location_dest!!.longitude = new_long.text.toString().toDouble()
+            locationDest = Location(LocationManager.GPS_PROVIDER)
+            locationDest!!.latitude = newLat.text.toString().toDouble()
+            locationDest!!.longitude = newLong.text.toString().toDouble()
         } catch (ex: Exception) {
 
         }
@@ -311,7 +308,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
         dialog = null
     }
 
-    fun onClickCancel(view: View) {
+    fun onClickCancel() {
         dialog!!.dismiss()
         dialog = null
     }

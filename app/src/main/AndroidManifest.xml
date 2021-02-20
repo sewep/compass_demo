@@ -7,9 +7,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_compass"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher_compass"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
         <activity android:name="pl.mr_electronics.compass.MainActivity" android:screenOrientation="portrait">
