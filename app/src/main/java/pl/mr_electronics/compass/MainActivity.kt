@@ -1,6 +1,7 @@
 package pl.mr_electronics.compass
 
 import android.Manifest
+import android.app.Dialog
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.*
@@ -17,6 +18,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
+import android.view.Window
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -39,6 +42,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
     private lateinit var magneticField: Sensor
     private lateinit var locationManager: LocationManager
     var handler: Handler = Handler(Looper.getMainLooper())
+    var dialog: Dialog? = null
     var location_curr: Location? = null
     var location_dest: Location? = null
 
@@ -72,13 +76,16 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
             override fun run() {
                 azimutAverage = azimutAverage * 0.8f + azimut * 0.2f
 
-                drawCompass(azimut, 20f)
+                var dest_dg: Float? = null;
 
                 if (location_dest != null && location_curr != null) {
-                    distanceInfo.text = String.format("Distance from the destination: %.0f m.", location_curr!!.distanceTo(location_dest));
+                    distanceInfo.text = String.format("Distance from the destination: %.0f m.", location_curr!!.distanceTo(location_dest))
+                    dest_dg = location_curr!!.bearingTo(location_dest)
                 } else {
                     distanceInfo.text = "Enter the destination point.";
                 }
+
+                drawCompass(azimut, dest_dg)
 
                 handler.postDelayed(this, 500)
             }
@@ -100,14 +107,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
         sensorManager.unregisterListener(this);
     }
 
-    fun drawCompass(dirWalk: Float, dirDestination: Float) {
+    fun drawCompass(dirWalk: Float, dirDestination: Float?) {
         val bitmap: Bitmap = Bitmap.createBitmap(800, 800, Bitmap.Config.ARGB_8888)
-        val canvas: Canvas = Canvas(bitmap)
+        val canvas = Canvas(bitmap)
 
 
         paintCentralStar(canvas, dirWalk)
         paintTrianglesOnACircle(canvas, dirWalk)
-        paintAzymutArrow(canvas, dirWalk, dirDestination)
+        if (dirDestination != null) paintAzymutArrow(canvas, dirWalk, dirDestination!!)
 
 
         // set bitmap as background to ImageView
@@ -265,5 +272,26 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
                 Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    fun onClickGPS(view: View) {
+        dialog = Dialog(this)
+        dialog!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog!!.setCancelable(false)
+        dialog!!.setContentView(R.layout.dialog_gps_destination)
+        //val body = dialog.findViewById(R.id.body) as TextView
+        //body.text = title
+        //val yesBtn = dialog.findViewById(R.id.yesBtn) as Button
+        //val noBtn = dialog.findViewById(R.id.noBtn) as TextView
+        //yesBtn.setOnClickListener {
+        //    dialog.dismiss()
+        //}
+        //noBtn.setOnClickListener { dialog.dismiss() }
+        dialog!!.show()
+    }
+
+    fun onClickSave(view: View) {
+        dialog!!.dismiss()
+        dialog = null
     }
 }
