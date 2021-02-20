@@ -18,6 +18,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.EditText
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
     private var locationCurr: Location? = null
     private var locationDest: Location? = null
 
+    private var gpsEnabled: Boolean = false
     private var mGravity: FloatArray? = null
     private var mGeomagnetic: FloatArray? = null
     private var azimut: Float = 0f
@@ -80,7 +82,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
 
                 var destDg: Float? = null
 
-                if (System.currentTimeMillis() - tsGetGpsLocation > 10000) {
+                if (!gpsEnabled) {
+                    distanceInfo.text = getString(R.string.turn_on_gps)
+                }
+                else if (System.currentTimeMillis() - tsGetGpsLocation > 10000) {
                     distanceInfo.text = getString(R.string.no_gps_signal)
                 } else {
                     if (locationDest != null && locationCurr != null) {
@@ -222,6 +227,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
 
     private fun getLocation() {
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        try {
+            gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            if (!gpsEnabled) return
+        } catch (ex: java.lang.Exception) {
+        }
+
         if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), locationPermissionCode)
             return
@@ -276,7 +288,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
         }
     }
 
-    fun onClickGPS() {
+    fun onClickGPS(view: View) {
         dialog = Dialog(this)
         dialog!!.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog!!.setCancelable(true)
@@ -292,7 +304,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
         dialog!!.window?.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
-    fun onClickSave() {
+    fun onClickSave(view: View) {
         val newLat = dialog!!.findViewById<EditText>(R.id.new_lat)
         val newLong = dialog!!.findViewById<EditText>(R.id.new_long)
 
@@ -308,7 +320,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
         dialog = null
     }
 
-    fun onClickCancel() {
+    fun onClickCancel(view: View) {
         dialog!!.dismiss()
         dialog = null
     }
