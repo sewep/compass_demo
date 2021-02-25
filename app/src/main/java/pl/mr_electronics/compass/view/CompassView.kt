@@ -122,10 +122,10 @@ class CompassView : View {
         paintPolygon(canvas, paintGray, arrow1, trans, 180.0f - dirWalk)
         paintPolygon(canvas, paintGray, arrow1, trans, 270.0f - dirWalk)
 
-        paintPolygon(canvas, paintGray, arrow2, trans, 50.0f - dirWalk)
-        paintPolygon(canvas, paintGray, arrow2, trans, 140.0f - dirWalk)
-        paintPolygon(canvas, paintGray, arrow2, trans, 230.0f - dirWalk)
-        paintPolygon(canvas, paintGray, arrow2, trans, 320.0f - dirWalk)
+        paintPolygon(canvas, paintGray, arrow2, trans, 45.0f - dirWalk)
+        paintPolygon(canvas, paintGray, arrow2, trans, 135.0f - dirWalk)
+        paintPolygon(canvas, paintGray, arrow2, trans, 225.0f - dirWalk)
+        paintPolygon(canvas, paintGray, arrow2, trans, 315.0f - dirWalk)
 
         paintCircle(canvas, getPaint(R.color.gray_800), PointF(0F, 0F), 0.09F)
         paintCircle(canvas, getPaint(R.color.white), PointF(0F, 0F), 0.06F)
@@ -139,12 +139,12 @@ class CompassView : View {
         val trans = PointF((width / 2).toFloat(), (height / 2).toFloat())
         val trans2 = PointF(0.0f,-0.45f * wh)
 
-        for (deg in 0..359 step 10) {
+        for (deg in 0..359 step 9) {
             var listPkt = arrow3
             var paintC = paintGray
             if (deg == 0) paintC = paintRed
             if (deg % 90 == 0) listPkt = arrow5
-            if ((deg-50) % 90 == 0) listPkt = arrow4
+            if ((deg-45) % 90 == 0) listPkt = arrow4
 
             paintPolygon(canvas, paintC, listPkt, trans, deg.toFloat() - dirWalk, trans2)
         }

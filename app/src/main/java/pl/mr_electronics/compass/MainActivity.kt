@@ -1,18 +1,13 @@
 package pl.mr_electronics.compass
 
-import android.Manifest
 import android.app.Dialog
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.*
-import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.OvalShape
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.os.Handler
@@ -24,13 +19,12 @@ import android.view.Window
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import pl.mr_electronics.compass.controller.CompassController
+import pl.mr_electronics.compass.controller.GpsController
 
 
-class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener {
+class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private val locationPermissionCode = 2
     private lateinit var sensorManager: SensorManager
@@ -46,21 +40,24 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
     private var mGravity: FloatArray? = null
     private var mGeomagnetic: FloatArray? = null
     private var azimut: Float = 0f
-    private var azimutAverage: Float = 0f
     private var tsGetGpsLocation: Long = 0
 
     private var compassController = CompassController()
+    private var gpsController = GpsController(this, compassController.compassModel)
 
+    companion object {
+        lateinit var context: Context
+            private set
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        context = this
         setContentView(R.layout.activity_main)
 
         compassController.setCompassView(compass_view)
-
-        locationDest = Location(LocationManager.GPS_PROVIDER)
-        locationDest!!.latitude = 37.4723
-        locationDest!!.longitude = -122.221
+        gpsController.setDestinationLocation(37.4723, -122.221);
+        gpsController.initGps()
 
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -71,27 +68,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
             this.magneticField = it
         }
 
-        getLocation()
 
 
         handler.postDelayed(object : Runnable {
             override fun run() {
 
-                if (!gpsEnabled) {
-                    distanceInfo.text = getString(R.string.turn_on_gps)
-                }
-                else if (System.currentTimeMillis() - tsGetGpsLocation > 10000) {
-                    distanceInfo.text = getString(R.string.no_gps_signal)
-                } else {
-                    if (locationDest != null && locationCurr != null) {
-                        distanceInfo.text = String.format(getString(R.string.distance_fom_the_destination), locationCurr!!.distanceTo(locationDest))
-                        compassController.setAzymut(locationCurr!!.bearingTo(locationDest))
-                    } else {
-                        distanceInfo.text = getString(R.string.enter_the_detination_point)
-                    }
-                }
-
                 compassController.moveCurrentAngle()
+                distanceInfo.text = gpsController.getMessage()
 
                 handler.postDelayed(this, 100)
             }
@@ -107,33 +90,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
     override fun onPause() {
         super.onPause()
         sensorManager.unregisterListener(this)
-    }
-
-    private fun getPaintColor(color: String) : Paint {
-        return getPaintColor(Color.parseColor(color))
-    }
-
-    private fun getPaintColor(color: Int) : Paint {
-        val paintGreen = Paint()
-        paintGreen.style = Paint.Style.FILL
-        paintGreen.color = color
-        return paintGreen
-    }
-
-    private fun getLocation() {
-        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-        try {
-            gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-            if (!gpsEnabled) return
-        } catch (ex: java.lang.Exception) {
-        }
-
-        if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), locationPermissionCode)
-            return
-        }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 5f, this)
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -167,17 +123,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
         }
     }
 
-    override fun onLocationChanged(location: Location) {
-        Log.i("Sensor", "onLocationChanged() ")
-        this.locationCurr = location
-        tsGetGpsLocation = System.currentTimeMillis()
-    }
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (requestCode == locationPermissionCode) {
+        if (requestCode == gpsController.locationPermissionCode) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
-                getLocation()
+                gpsController.initGps()
             }
             else {
                 Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
