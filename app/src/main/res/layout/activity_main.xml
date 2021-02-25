@@ -36,13 +36,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <ImageView
+    <pl.mr_electronics.compass.view.CompassView
         android:id="@+id/compass_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/distanceInfo" />
+        app:layout_constraintTop_toBottomOf="@+id/distanceInfo"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

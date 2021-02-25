@@ -27,16 +27,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
+import pl.mr_electronics.compass.controller.CompassController
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener {
-
-    private var arrow1 = listOf(PointF(-35.0f, 0.0f), PointF(0.0f, -300.0f), PointF(35.0f, 0.0f))
-    private var arrow2 = listOf(PointF(-25.0f, 0.0f), PointF(0.0f, -220.0f), PointF(25.0f, 0.0f))
-    private var arrow3 = listOf(PointF(-8.0f, 0.0f), PointF(0.0f, 20.0f), PointF(8.0f, 0.0f))
-    private var arrow4 = listOf(PointF(-16.0f, 0.0f), PointF(0.0f, 34.0f), PointF(16.0f, 0.0f))
-    private var arrow5 = listOf(PointF(-25.0f, 0.0f), PointF(0.0f, 46.0f), PointF(25.0f, 0.0f))
-    private var arrow6 = listOf(PointF(-25.0f, 0.0f), PointF(0.0f, -46.0f), PointF(25.0f, 0.0f))
 
     private val locationPermissionCode = 2
     private lateinit var sensorManager: SensorManager
@@ -55,10 +49,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
     private var azimutAverage: Float = 0f
     private var tsGetGpsLocation: Long = 0
 
+    private var compassController = CompassController()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        compassController.setCompassView(compass_view)
 
         locationDest = Location(LocationManager.GPS_PROVIDER)
         locationDest!!.latitude = 37.4723
@@ -78,9 +76,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
 
         handler.postDelayed(object : Runnable {
             override fun run() {
-                azimutAverage = azimutAverage * 0.8f + azimut * 0.2f
-
-                var destDg: Float? = null
 
                 if (!gpsEnabled) {
                     distanceInfo.text = getString(R.string.turn_on_gps)
@@ -90,15 +85,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
                 } else {
                     if (locationDest != null && locationCurr != null) {
                         distanceInfo.text = String.format(getString(R.string.distance_fom_the_destination), locationCurr!!.distanceTo(locationDest))
-                        destDg = locationCurr!!.bearingTo(locationDest)
+                        compassController.setAzymut(locationCurr!!.bearingTo(locationDest))
                     } else {
                         distanceInfo.text = getString(R.string.enter_the_detination_point)
                     }
                 }
 
-                drawCompass(azimut, destDg)
+                compassController.moveCurrentAngle()
 
-                handler.postDelayed(this, 500)
+                handler.postDelayed(this, 100)
             }
         },200)
     }
@@ -114,19 +109,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
         sensorManager.unregisterListener(this)
     }
 
-    fun drawCompass(dirWalk: Float, dirDestination: Float?) {
-        val bitmap: Bitmap = Bitmap.createBitmap(800, 800, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-
-
-        paintCentralStar(canvas, dirWalk)
-        paintTrianglesOnACircle(canvas, dirWalk)
-        if (dirDestination != null) paintAzymutArrow(canvas, dirWalk, dirDestination)
-
-        // set bitmap as background to ImageView
-        compass_view.setImageBitmap(bitmap)
-    }
-
     private fun getPaintColor(color: String) : Paint {
         return getPaintColor(Color.parseColor(color))
     }
@@ -136,93 +118,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
         paintGreen.style = Paint.Style.FILL
         paintGreen.color = color
         return paintGreen
-    }
-
-    private fun paintAzymutArrow(canvas: Canvas, dirWalk: Float, direction: Float) {
-        val paintGreen = getPaintColor("#00cc00")
-
-        val trans = PointF(400.0f,400.0f)
-        val trans2 = PointF(0.0f,-354.0f)
-        paintPolygon(canvas, paintGreen, arrow6, trans, direction - dirWalk, trans2)
-    }
-
-    private fun paintTrianglesOnACircle(canvas: Canvas, dirWalk: Float) {
-        val paintRed = getPaintColor(Color.RED)
-        val paintGray = getPaintColor("#202020")
-
-        val trans = PointF(400.0f,400.0f)
-        val trans2 = PointF(0.0f,-350.0f)
-
-        for (deg in 0..359 step 10) {
-            var listPkt = arrow3
-            var paintC = paintGray
-            if (deg == 0) paintC = paintRed
-            if (deg % 90 == 0) listPkt = arrow5
-            if ((deg-50) % 90 == 0) listPkt = arrow4
-
-            paintPolygon(canvas, paintC, listPkt, trans, deg.toFloat() - dirWalk, trans2)
-        }
-    }
-
-    private fun paintCentralStar(canvas: Canvas, dirWalk: Float) {
-        val paintRed = getPaintColor(Color.RED)
-        val paintGray = getPaintColor("#202020")
-        val paintWhite = getPaintColor(Color.WHITE)
-
-
-        val trans = PointF(400.0f,400.0f)
-
-        paintPolygon(canvas, paintRed, arrow1, trans, 0.0f - dirWalk)
-        paintPolygon(canvas, paintGray, arrow1, trans, 90.0f - dirWalk)
-        paintPolygon(canvas, paintGray, arrow1, trans, 180.0f - dirWalk)
-        paintPolygon(canvas, paintGray, arrow1, trans, 270.0f - dirWalk)
-
-        paintPolygon(canvas, paintGray, arrow2, trans, 50.0f - dirWalk)
-        paintPolygon(canvas, paintGray, arrow2, trans, 140.0f - dirWalk)
-        paintPolygon(canvas, paintGray, arrow2, trans, 230.0f - dirWalk)
-        paintPolygon(canvas, paintGray, arrow2, trans, 320.0f - dirWalk)
-
-        paintCircle(canvas, paintGray, trans, 70)
-        paintCircle(canvas, paintWhite, trans, 50)
-        paintCircle(canvas, paintGray, trans, 30)
-    }
-
-    private fun paintCircle(canvas: Canvas, paint: Paint, translate: PointF, r: Int) {
-        val shapeDrawable = ShapeDrawable(OvalShape())
-        shapeDrawable.setBounds(
-                translate.x.toInt()-r,
-                translate.y.toInt()-r,
-                translate.x.toInt()+r,
-                translate.y.toInt()+r)
-        shapeDrawable.paint.color = paint.color
-        shapeDrawable.draw(canvas)
-    }
-
-    private fun paintPolygon(canvas: Canvas, paint: Paint, points: List<PointF>, translate: PointF, deg: Float) {
-        paintPolygon(canvas, paint, points, translate, deg, PointF(0.0f, 0.0F))
-    }
-
-    private fun paintPolygon(canvas: Canvas, paint: Paint, points: List<PointF>, translate: PointF, deg: Float, translate2: PointF) {
-        if (points.isEmpty()) return
-
-        val m = Matrix()
-        m.postTranslate(translate2.x, translate2.y)
-        m.postRotate(deg)
-        m.postTranslate(translate.x, translate.y)
-
-        canvas.save()
-        canvas.setMatrix(m)
-
-        // Draw
-        val path = Path()
-        path.reset()
-        path.moveTo(points.last().x, points.last().y)
-        for (pkt in points) {
-            path.lineTo(pkt.x, pkt.y)
-        }
-        canvas.drawPath(path, paint)
-
-        canvas.restore()
     }
 
     private fun getLocation() {
@@ -266,6 +161,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
 
                 azimut = Math.toDegrees(orientation[0].toDouble()).toFloat()
                 //Log.i("Sensor", "azimut: " + azimut);
+
+                compassController.setAndgle(-azimut)
             }
         }
     }
