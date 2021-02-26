@@ -24,6 +24,7 @@ class CompassController {
         val nazymut = compassModel.moveToTargetAzymut()
         if (compass_view != null) {
             compass_view!!.azymutAngle = nazymut
+            compass_view!!.azymutEnabled = compassModel.gpsEnabled
         }
         return nazymut
     }

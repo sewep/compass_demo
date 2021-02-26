@@ -21,6 +21,9 @@ class CompassModel {
     var lastTimeCalculationsAngle = System.currentTimeMillis()
     var lastTimeCalculationsAzymut = System.currentTimeMillis()
 
+    constructor() {
+
+    }
 
 
     fun moveToDestinationAngle(): Float {

@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity() {
 
     private val rTimer: Runnable = object : Runnable {
         override fun run() {
+            gpsController.checkSignalGps()
             compassController.invalidate()
             distanceInfo.text = gpsController.getMessage()
 

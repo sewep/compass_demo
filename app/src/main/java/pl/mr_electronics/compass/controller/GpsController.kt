@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Bundle
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import pl.mr_electronics.compass.model.CompassModel
@@ -58,8 +59,23 @@ class GpsController(private var activity: Activity, private var compassModel: Co
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 5f, this)
     }
 
+    fun checkSignalGps(): Boolean {
+        compassModel.gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        return compassModel.gpsEnabled
+    }
+
     override fun onLocationChanged(location: Location) {
         setCurrentLocation(location)
     }
 
+    override fun onProviderEnabled(provider: String) {
+        //super.onProviderEnabled(provider)
+        initGps()
+    }
+
+    override fun onProviderDisabled(provider: String) {
+        //super.onProviderDisabled(provider)
+        compassModel.gpsEnabled = false
+        compassModel.currentLocation = null
+    }
 }
