@@ -22,28 +22,18 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import pl.mr_electronics.compass.controller.CompassController
 import pl.mr_electronics.compass.controller.GpsController
+import pl.mr_electronics.compass.controller.MagneticSensorController
 
 
-class MainActivity : AppCompatActivity(), SensorEventListener {
+class MainActivity : AppCompatActivity() {
 
-    private val locationPermissionCode = 2
-    private lateinit var sensorManager: SensorManager
-    private lateinit var accelerometer: Sensor
-    private lateinit var magneticField: Sensor
-    private lateinit var locationManager: LocationManager
     private var handler: Handler = Handler(Looper.getMainLooper())
     private var dialog: Dialog? = null
-    private var locationCurr: Location? = null
     private var locationDest: Location? = null
-
-    private var gpsEnabled: Boolean = false
-    private var mGravity: FloatArray? = null
-    private var mGeomagnetic: FloatArray? = null
-    private var azimut: Float = 0f
-    private var tsGetGpsLocation: Long = 0
 
     private var compassController = CompassController()
     private var gpsController = GpsController(this, compassController.compassModel)
+    private var magneticSensorController = MagneticSensorController(this, compassController.compassModel)
 
     companion object {
         lateinit var context: Context
@@ -58,21 +48,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         compassController.setCompassView(compass_view)
         gpsController.setDestinationLocation(37.4723, -122.221);
         gpsController.initGps()
-
-
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.let {
-            this.accelerometer = it
-        }
-        sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)?.let {
-            this.magneticField = it
-        }
-
-
+        magneticSensorController.setupService()
 
         handler.postDelayed(object : Runnable {
             override fun run() {
-
                 compassController.moveCurrentAngle()
                 distanceInfo.text = gpsController.getMessage()
 
@@ -83,44 +62,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onResume() {
         super.onResume()
-        sensorManager.registerListener(this, this.accelerometer, SensorManager.SENSOR_DELAY_FASTEST)
-        sensorManager.registerListener(this, this.magneticField, SensorManager.SENSOR_DELAY_FASTEST)
+        magneticSensorController.registerService()
     }
 
     override fun onPause() {
         super.onPause()
-        sensorManager.unregisterListener(this)
-    }
-
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        Log.i("Sensor", "onAccuracyChanged() ")
-    }
-
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event == null) return
-
-        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER)
-            mGravity = event.values
-
-        if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD)
-            mGeomagnetic = event.values
-
-        if (mGravity != null && mGeomagnetic != null) {
-            val r = FloatArray(9)
-            val i = FloatArray(9)
-
-            if (SensorManager.getRotationMatrix(r, i, mGravity, mGeomagnetic)) {
-
-                // orientation contains azimut, pitch and roll
-                val orientation = FloatArray(3)
-                SensorManager.getOrientation(r, orientation)
-
-                azimut = Math.toDegrees(orientation[0].toDouble()).toFloat()
-                //Log.i("Sensor", "azimut: " + azimut);
-
-                compassController.setAndgle(-azimut)
-            }
-        }
+        magneticSensorController.unregisterService()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
