@@ -15,10 +15,10 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
-        android:background="@android:drawable/button_onoff_indicator_off"
+        android:background="@android:drawable/editbox_background_normal"
         android:gravity="center_horizontal"
         android:padding="15dp"
-        android:text="Distance from the destination:"
+        android:text="@string/distance_from_the_destination"
         android:textColor="@color/c700"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -31,18 +31,18 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:onClick="onClickGPS"
-        android:text="SET DESTINATION"
+        android:text="@string/set_destination"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <ImageView
+    <pl.mr_electronics.compass.view.CompassView
         android:id="@+id/compass_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/distanceInfo" />
+        app:layout_constraintTop_toBottomOf="@+id/distanceInfo"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
