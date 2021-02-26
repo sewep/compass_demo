@@ -12,12 +12,8 @@ class CompassController {
         this.compass_view = compass_view
     }
 
-    fun setAndgle(deg: Float) {
-        compassModel.oriantationToSet = deg
-    }
+    fun setMessageTextControl() {
 
-    fun setAzymut(deg: Float) {
-        compassModel.azymutToTarget = deg
     }
 
     fun moveCurrentAngle(): Float {

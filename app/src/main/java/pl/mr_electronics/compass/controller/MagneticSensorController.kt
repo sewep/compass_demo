@@ -24,7 +24,7 @@ class MagneticSensorController : SensorEventListener {
         this.compassModel = compassModel
     }
 
-    fun setupService() {
+    fun initSrevice() {
         sensorManager = activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.let {
             this.accelerometer = it

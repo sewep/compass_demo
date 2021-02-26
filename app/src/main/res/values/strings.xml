@@ -11,4 +11,6 @@
     <string name="turn_on_gps">Turn on GPS.</string>
     <string name="permission_granted">Permission Granted</string>
     <string name="permission_denied">Permission Denied</string>
+    <string name="distance_from_the_destination">Distance from the destination:</string>
+    <string name="set_destination">SET DESTINATION</string>
 </resources>

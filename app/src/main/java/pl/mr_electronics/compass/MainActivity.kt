@@ -34,18 +34,21 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         compassController.setCompassView(compass_view)
-        gpsController.setDestinationLocation(37.4723, -122.221);
         gpsController.initGps()
-        magneticSensorController.setupService()
+        magneticSensorController.initSrevice()
 
-        handler.postDelayed(object : Runnable {
-            override fun run() {
-                compassController.moveCurrentAngle()
-                distanceInfo.text = gpsController.getMessage()
+        gpsController.setDestinationLocation(37.4723, -122.221) // default value
 
-                handler.postDelayed(this, 50)
-            }
-        },100)
+        handler.postDelayed(rTimer,100)
+    }
+
+    private val rTimer: Runnable = object : Runnable {
+        override fun run() {
+            compassController.moveCurrentAngle()
+            distanceInfo.text = gpsController.getMessage()
+
+            handler.postDelayed(this, 50) // repeat
+        }
     }
 
     override fun onResume() {
@@ -71,8 +74,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onClickGPS(view: View) {
-        var dg = SetLocationDialog(this, gpsController)
-        dg.show()
+        SetLocationDialog(this, gpsController).show()
     }
 
 }

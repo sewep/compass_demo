@@ -11,21 +11,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import pl.mr_electronics.compass.model.CompassModel
 
-class GpsController : LocationListener {
+class GpsController(private var activity: Activity, private var compassModel: CompassModel) : LocationListener {
 
-    private var activity: Activity
-    private var compassModel: CompassModel
     private lateinit var locationManager: LocationManager
     val locationPermissionCode = 2
 
 
-    constructor(activity: Activity, compassModel: CompassModel) {
-        this.activity = activity
-        this.compassModel = compassModel
-    }
-
     fun setDestinationLocation(lat: Double, long: Double) {
-        var locationDest = Location(LocationManager.GPS_PROVIDER)
+        val locationDest = Location(LocationManager.GPS_PROVIDER)
         locationDest.latitude = lat
         locationDest.longitude = long
         setDestinationLocation(locationDest)
