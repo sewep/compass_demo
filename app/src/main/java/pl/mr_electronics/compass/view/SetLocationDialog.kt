@@ -12,9 +12,13 @@ import android.view.Window
 import android.widget.EditText
 import kotlinx.android.synthetic.main.dialog_gps_destination.*
 import pl.mr_electronics.compass.R
+import pl.mr_electronics.compass.controller.CompassController
 import pl.mr_electronics.compass.controller.GpsController
 
-class SetLocationDialog(context: Context, private val gpsController: GpsController) : Dialog(context)  {
+class SetLocationDialog(
+    context: Context,
+    private val gpsController: GpsController,
+    private val compassController: CompassController) : Dialog(context)  {
 
     init {
         setCancelable(true)
@@ -30,8 +34,10 @@ class SetLocationDialog(context: Context, private val gpsController: GpsControll
 
         var currDestination = gpsController.getDestination()
         if (currDestination != null) {
-            findViewById<EditText>(R.id.new_lat).setText(currDestination!!.latitude.toString())
-            findViewById<EditText>(R.id.new_long).setText(currDestination!!.longitude.toString())
+            findViewById<EditText>(R.id.new_lat).setText(
+                String.format("%.6f", currDestination!!.latitude).replace(",","."))
+            findViewById<EditText>(R.id.new_long).setText(
+                String.format("%.6f", currDestination!!.longitude).replace(",","."))
         }
 
         bt_save.setOnClickListener(onClickSave)
@@ -46,6 +52,7 @@ class SetLocationDialog(context: Context, private val gpsController: GpsControll
             gpsController.setDestinationLocation(
                 newLat.text.toString().toDouble(),
                 newLong.text.toString().toDouble())
+            compassController.saveDestinationLocationInPreferences()
         } catch (ex: Exception) {
             Log.e("SetLocationDialog", ex.message.toString())
         }

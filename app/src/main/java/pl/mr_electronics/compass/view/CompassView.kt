@@ -23,6 +23,7 @@ class CompassView : View {
     var wh: Int = 0
     var presentAngle = 0f
     var azymutAngle = 0f
+    var azymutEnabled = false
 
     constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(
         context,
@@ -57,7 +58,7 @@ class CompassView : View {
 
         paintCentralStar(canvas, presentAngle)
         paintTrianglesOnACircle(canvas, presentAngle)
-        paintAzymutArrow(canvas, presentAngle, azymutAngle)
+        if (azymutEnabled) paintAzymutArrow(canvas, presentAngle, azymutAngle)
 
         canvas.restore()
     }

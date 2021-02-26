@@ -2,7 +2,7 @@
     <string name="app_name">Compass</string>
     <string name="enter_the_detination_point">Enter the destination point.</string>
     <string name="no_gps_signal">No GPS signal.</string>
-    <string name="distance_fom_the_destination">Distance from the destination: %.0f m.</string>
+    <string name="distance_fom_the_destination">Distance from the destination: %s.</string>
     <string name="lat">Lat</string>
     <string name="dastination_point">Dastination point</string>
     <string name="long_2">Long</string>

@@ -1,4 +1,4 @@
-package pl.mr_electronics.compass
+package pl.mr_electronics.compass.view
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -9,10 +9,10 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import pl.mr_electronics.compass.R
 import pl.mr_electronics.compass.controller.CompassController
 import pl.mr_electronics.compass.controller.GpsController
 import pl.mr_electronics.compass.controller.MagneticSensorController
-import pl.mr_electronics.compass.view.SetLocationDialog
 
 
 class MainActivity : AppCompatActivity() {
@@ -33,18 +33,18 @@ class MainActivity : AppCompatActivity() {
         context = this
         setContentView(R.layout.activity_main)
 
+        compassController.destinationLocationFromPreferences()
         compassController.setCompassView(compass_view)
         gpsController.initGps()
         magneticSensorController.initSrevice()
-
-        gpsController.setDestinationLocation(37.4723, -122.221) // default value
 
         handler.postDelayed(rTimer,100)
     }
 
     private val rTimer: Runnable = object : Runnable {
         override fun run() {
-            compassController.moveCurrentAngle()
+            gpsController.checkSignalGps()
+            compassController.invalidate()
             distanceInfo.text = gpsController.getMessage()
 
             handler.postDelayed(this, 50) // repeat
@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onClickGPS(view: View) {
-        SetLocationDialog(this, gpsController).show()
+        SetLocationDialog(this, gpsController, compassController).show()
     }
 
 }
