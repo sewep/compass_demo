@@ -1,6 +1,8 @@
 package pl.mr_electronics.compass.model
 
+import android.content.Context
 import android.location.Location
+import android.location.LocationManager
 import pl.mr_electronics.compass.view.MainActivity
 import pl.mr_electronics.compass.R
 
@@ -20,10 +22,6 @@ class CompassModel {
 
     var lastTimeCalculationsAngle = System.currentTimeMillis()
     var lastTimeCalculationsAzymut = System.currentTimeMillis()
-
-    constructor() {
-
-    }
 
 
     fun moveToDestinationAngle(): Float {

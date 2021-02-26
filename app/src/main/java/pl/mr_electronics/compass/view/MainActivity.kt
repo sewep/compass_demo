@@ -33,11 +33,10 @@ class MainActivity : AppCompatActivity() {
         context = this
         setContentView(R.layout.activity_main)
 
+        compassController.destinationLocationFromPreferences()
         compassController.setCompassView(compass_view)
         gpsController.initGps()
         magneticSensorController.initSrevice()
-
-        gpsController.setDestinationLocation(37.4723, -122.221) // default value
 
         handler.postDelayed(rTimer,100)
     }
@@ -75,7 +74,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onClickGPS(view: View) {
-        SetLocationDialog(this, gpsController).show()
+        SetLocationDialog(this, gpsController, compassController).show()
     }
 
 }
