@@ -1,4 +1,4 @@
-package pl.mr_electronics.compass
+package pl.mr_electronics.compass.view
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -9,10 +9,10 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import pl.mr_electronics.compass.R
 import pl.mr_electronics.compass.controller.CompassController
 import pl.mr_electronics.compass.controller.GpsController
 import pl.mr_electronics.compass.controller.MagneticSensorController
-import pl.mr_electronics.compass.view.SetLocationDialog
 
 
 class MainActivity : AppCompatActivity() {

@@ -55,7 +55,7 @@ class GpsController(private var activity: Activity, private var compassModel: Co
             ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), locationPermissionCode)
             return
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 5f, this)
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 5f, this)
     }
 
     override fun onLocationChanged(location: Location) {

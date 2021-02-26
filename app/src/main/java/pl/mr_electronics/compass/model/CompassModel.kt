@@ -1,7 +1,7 @@
 package pl.mr_electronics.compass.model
 
 import android.location.Location
-import pl.mr_electronics.compass.MainActivity
+import pl.mr_electronics.compass.view.MainActivity
 import pl.mr_electronics.compass.R
 
 class CompassModel {

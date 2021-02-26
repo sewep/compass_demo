@@ -12,7 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_compass"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
-        <activity android:name="pl.mr_electronics.compass.MainActivity" android:screenOrientation="portrait">
+        <activity android:name="pl.mr_electronics.compass.view.MainActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
