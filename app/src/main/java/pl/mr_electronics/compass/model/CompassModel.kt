@@ -57,7 +57,7 @@ class CompassModel {
         } else {
             if (destinationLocation != null && currentLocation != null) {
                 distaceToTarget = currentLocation!!.distanceTo(destinationLocation)
-                messageGps = String.format(MainActivity.context.getString(R.string.distance_fom_the_destination), distaceToTarget)
+                messageGps = String.format(MainActivity.context.getString(R.string.distance_fom_the_destination), MathTools.MettersToHumanRedable(distaceToTarget))
                 azymutToTarget = currentLocation!!.bearingTo(destinationLocation)
             } else {
                 messageGps = MainActivity.context.getString(R.string.enter_the_detination_point)

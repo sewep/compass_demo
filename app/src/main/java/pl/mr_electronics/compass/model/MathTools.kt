@@ -13,6 +13,13 @@ class MathTools {
             }
             return correction
         }
+
+        fun MettersToHumanRedable(meters: Float): String {
+            if (meters > 1000f)
+                return String.format("%.1f km", meters / 1000f)
+            else
+                return String.format("%.0f m", meters)
+        }
     }
 
 }
