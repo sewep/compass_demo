@@ -9,4 +9,6 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="turn_on_gps">Turn on GPS.</string>
+    <string name="permission_granted">Permission Granted</string>
+    <string name="permission_denied">Permission Denied</string>
 </resources>

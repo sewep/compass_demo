@@ -45,6 +45,10 @@ class GpsController : LocationListener {
         return compassModel.messageGps
     }
 
+    fun getDestination(): Location? {
+        return compassModel.destinationLocation
+    }
+
     fun initGps() {
         locationManager = activity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
