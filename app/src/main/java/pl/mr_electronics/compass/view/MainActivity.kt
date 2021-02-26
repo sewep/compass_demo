@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
 
     private val rTimer: Runnable = object : Runnable {
         override fun run() {
-            compassController.moveCurrentAngle()
+            compassController.invalidate()
             distanceInfo.text = gpsController.getMessage()
 
             handler.postDelayed(this, 50) // repeat

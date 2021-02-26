@@ -11,36 +11,38 @@ class CompassModel {
     var angleSpeed: Float = 1.0f
     var gpsEnabled: Boolean = false
     var azymutToTarget: Float = 0.0f
+    var azymutToPresent: Float = 0.0f
     var distaceToTarget: Float = 0f
     var messageGps: String = ""
 
     var currentLocation: Location? = null
     var destinationLocation: Location? = null
 
-    var lastTimeCalculations = System.currentTimeMillis()
+    var lastTimeCalculationsAngle = System.currentTimeMillis()
+    var lastTimeCalculationsAzymut = System.currentTimeMillis()
 
 
 
     fun moveToDestinationAngle(): Float {
         val currTime = System.currentTimeMillis()
-        val delta = (currTime - lastTimeCalculations).toFloat()
-        lastTimeCalculations = currTime
-
+        val delta = (currTime - lastTimeCalculationsAngle).toFloat()
+        lastTimeCalculationsAngle = currTime
         val delta_s = Math.min(delta / 1000.0f, 1.0f)
-        val step = calcCorrectionAngle() * delta_s * angleSpeed
+
+        val step = MathTools.DegToAngle(currOrientation, oriantationToSet) * delta_s * angleSpeed
         currOrientation += step
         return currOrientation
     }
 
-    fun calcCorrectionAngle() : Float {
-        var correction = oriantationToSet - currOrientation
-        if (Math.abs(correction) > 180) {
-            if (correction < 0)
-                correction = (360 + correction)
-            else
-                correction = -(360 - correction)
-        }
-        return correction
+    fun moveToTargetAzymut(): Float {
+        val currTime = System.currentTimeMillis()
+        val delta = (currTime - lastTimeCalculationsAzymut).toFloat()
+        lastTimeCalculationsAzymut = currTime
+        val delta_s = Math.min(delta / 1000.0f, 1.0f)
+
+        val step = MathTools.DegToAngle(azymutToPresent, azymutToTarget) * delta_s * angleSpeed
+        azymutToPresent += step
+        return azymutToPresent
     }
 
     fun calcGPS() {

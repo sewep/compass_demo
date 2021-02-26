@@ -12,18 +12,27 @@ class CompassController {
         this.compass_view = compass_view
     }
 
-    fun setMessageTextControl() {
-
-    }
-
     fun moveCurrentAngle(): Float {
         val nangle = compassModel.moveToDestinationAngle()
         if (compass_view != null) {
             compass_view!!.presentAngle = nangle
-            compass_view!!.azymutAngle = compassModel.azymutToTarget
+        }
+        return nangle
+    }
+
+    fun moveCurrentAzymut(): Float {
+        val nazymut = compassModel.moveToTargetAzymut()
+        if (compass_view != null) {
+            compass_view!!.azymutAngle = nazymut
+        }
+        return nazymut
+    }
+
+    fun invalidate() {
+        if (compass_view != null) {
+            moveCurrentAngle()
+            moveCurrentAzymut()
             compass_view!!.invalidate()
         }
-
-        return nangle
     }
 }
